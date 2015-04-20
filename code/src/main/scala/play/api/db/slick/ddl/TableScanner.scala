@@ -1,22 +1,19 @@
 package play.api.db.slick.ddl
 
-import scala.slick.driver.JdbcDriver
-import scala.slick.lifted.AbstractTable
-import org.apache.xerces.dom3.as.ASModel
-import scala.slick.driver.JdbcProfile
-import scala.slick.lifted.Tag
+import slick.SlickException
+import slick.driver.JdbcDriver
+import slick.lifted.AbstractTable
 
 import scala.reflect.internal.MissingRequirementError
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe._
-import scala.slick.SlickException
 
 class SlickDDLException(val message: String) extends Exception(message)
 
 object TableScanner {
   lazy val logger = play.api.Logger(TableScanner.getClass)
 
-  type DDL = scala.slick.profile.SqlProfile#DDL
+  type DDL = slick.profile.SqlProfile#DDL
 
   private def subTypeOf(sym: Symbol, subTypeSymbol: Symbol) = {
     sym.typeSignature.baseClasses.find(_ == subTypeSymbol).isDefined
@@ -37,7 +34,7 @@ object TableScanner {
     }
 
     val tableQueryTypeSymbol = {
-      import driver.simple._
+      import driver.api._
       typeOf[TableQuery[_]].typeSymbol
     }
 
@@ -55,8 +52,8 @@ object TableScanner {
     }
 
     foundInstances.map { case (name, instance) =>
-      import driver.simple._
-      name -> logSlickException(instance.asInstanceOf[TableQuery[Table[_]]].ddl)
+      import driver.api._
+      name -> logSlickException(instance.asInstanceOf[TableQuery[Table[_]]].schema)
     }.toSet
   }
 
@@ -80,12 +77,12 @@ object TableScanner {
         val constructorMethod = constructorSymbol.asMethod
         val reflectedClass = mirror.reflectClass(classSymbol)
         val constructor = reflectedClass.reflectConstructor(constructorMethod)
-        import driver.simple._
+        import driver.api._
         logSlickException {
           Some(classSymbol -> TableQuery { tag =>
             val instance = constructor(tag)
             instance.asInstanceOf[Table[_]]
-          }.ddl)
+          }.schema)
         }
       } else {
         None

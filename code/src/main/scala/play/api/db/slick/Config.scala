@@ -1,8 +1,8 @@
 package play.api.db.slick
 
 import javax.sql.DataSource
-import scala.slick.driver._
-import play.api.{ Configuration, Application }
+import slick.driver._
+import play.api.{Logger, Configuration, Application}
 
 trait Config {
   val defaultName = "default"
@@ -58,6 +58,7 @@ trait Config {
   }
 
   def driver(name: String = defaultName)(app: Application): JdbcDriver = {
+    Logger.debug(s"driver called with name '$name'")
     val conf = app.configuration
     val key = s"db.$name.driver"
     val driverName = conf.getString(key).getOrElse {

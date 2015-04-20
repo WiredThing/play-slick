@@ -63,7 +63,7 @@ object ReflectionUtils {
         baseIM.reflectModule(baseMember.asModule).instance
       }
     } else {
-      assert(baseMember.isTerm, s"Expected '$name' to be something that can be reflected on $base as a field")
+      //assert(baseMember.isTerm, s"Expected '$name' to be something that can be reflected on $base as a field")
       baseIM.reflectMethod(baseMember.asTerm.asMethod).apply()
       
     }

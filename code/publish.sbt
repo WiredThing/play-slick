@@ -36,10 +36,11 @@ pomExtra := (
   </developers>
 )
 
-publishTo <<= version { v: String =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some(Opts.resolver.sonatypeSnapshots)
+credentials in ThisBuild += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
+publishTo := {
+  if (isSnapshot.value)
+    Some("WiredThing forked libraries Repository" at "https://wiredthing.artifactoryonline.com/wiredthing/libs-forked-local")
   else
-    Some(Opts.resolver.sonatypeStaging)
+    Some("WiredThing forked libraries Repository" at "https://wiredthing.artifactoryonline.com/wiredthing/libs-forked-local")
 }

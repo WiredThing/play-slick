@@ -1,9 +1,7 @@
 package play.api.db.slick.plugin
 
-import play.api.Application
-import play.api.Plugin
+import play.api.{Logger, Application, Plugin, Mode}
 import play.api.libs.Files
-import play.api.Mode
 import scala.Option.option2Iterable
 import scala.annotation.tailrec
 import play.api.db.slick.ddl.TableScanner
@@ -12,7 +10,7 @@ import play.api.db.slick.Config
 
 class SlickDDLPlugin(app: Application) extends Plugin {
 
-  private val configKey = "slick"
+  private val configKey = "slick3"
 
   private def isDisabled: Boolean = app.configuration.getString("evolutionplugin").map(_ == "disabled").headOption.getOrElse(false)
 
@@ -21,8 +19,11 @@ class SlickDDLPlugin(app: Application) extends Plugin {
   override def onStart(): Unit = {
     val conf = app.configuration.getConfig(configKey)
     conf.foreach { conf =>
+      conf.entrySet.foreach { case (k,v) => println(s"$k=$v")}
       conf.keys.foreach { key =>
+        Logger.debug(s"Checking evo for $key")
         val packageNames = conf.getString(key).getOrElse(throw conf.reportError(key, "Expected key " + key + " but could not get its values!", None)).split(",").toSet
+        Logger.debug(s"package names: $packageNames")
         if (app.mode != Mode.Prod) {
           val evolutionsEnabled = !"disabled".equals(app.configuration.getString("evolutionplugin"))
           if (evolutionsEnabled) {
@@ -46,6 +47,7 @@ class SlickDDLPlugin(app: Application) extends Plugin {
   private val CreatedBy = "# --- Created by "
 
   def evolutionScript(driverName: String, names: Set[String])(app: Application): Option[String] = {
+    Logger.debug(s"evolutionScript called with driverName '$driverName'")
     val driver = Config.driver(driverName)(app)
     val ddls = TableScanner.reflectAllDDLMethods(names, driver, app.classloader)
 
